@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36221.1 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphApiEmailDownloader", "GraphApiEmailDownloader\GraphApiEmailDownloader.csproj", "{7C0F0C48-21FA-4DAB-A1D0-B10BDA53B277}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7C0F0C48-21FA-4DAB-A1D0-B10BDA53B277}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C0F0C48-21FA-4DAB-A1D0-B10BDA53B277}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C0F0C48-21FA-4DAB-A1D0-B10BDA53B277}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C0F0C48-21FA-4DAB-A1D0-B10BDA53B277}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5F7B37B7-A3A9-48EF-ACA0-CF8A73DACF90}
+	EndGlobalSection
+EndGlobal
