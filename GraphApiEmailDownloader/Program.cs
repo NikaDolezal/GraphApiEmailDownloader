@@ -8,6 +8,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 
@@ -27,16 +29,24 @@ namespace GraphApiEmailDownloader
             Console.WriteLine( "tenant ID: " + settings.TenantId );
             Console.WriteLine( "email: " + settings.Email );
             Console.WriteLine( "start date: " + settings.StartDate );
+            Console.WriteLine( "dir path: " + settings.DirPath );
 
             //-------------------------------------------------------------------------------------
             // user auth through browser UI
             InitializeGraph( settings );
-            Console.WriteLine( "OK - intialize Graph" );
+            Console.WriteLine( "OK - initialize Graph" );
 
             //-------------------------------------------------------------------------------------
             // process inbox of given email from given date - loaded from cfg
-            await GraphUtil.ProcessInboxAsync( settings.Email, settings.StartDate );
+            await GraphUtil.ProcessInboxAsync( settings );
             Console.WriteLine( "OK - process inbox" );
+
+            //-------------------------------------------------------------------------------------
+            // save new start date in cfg
+            DateTime timestamp = DateTime.UtcNow;
+            settings.StartDate = String.Format( "{0}T{1}Z", timestamp.ToString( "yyyy-MM-dd" ), timestamp.ToString( "HH:mm:ss" ) );
+            Settings.SaveSettings( settings );
+            Console.WriteLine( "OK - update cfg" );
 
             Console.WriteLine( "---PRG FINISH--" );
         }

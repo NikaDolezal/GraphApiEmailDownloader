@@ -43,7 +43,7 @@ namespace GraphApiEmailDownloader
             _userClient = new GraphServiceClient( _deviceCodeCredential, settings.GraphUserScopes );
         }
         
-        public static async Task<MessageCollectionResponse> ProcessInboxAsync( string email, string startDate )                  
+        public static async Task<MessageCollectionResponse> ProcessInboxAsync( Settings settings )                  
         {           
             // make sure client isn't null
             if (_userClient == null)
@@ -56,7 +56,7 @@ namespace GraphApiEmailDownloader
             //-------------------------------------------------------------------------------------
             // first request
             // user from cfg email
-            var res = await _userClient.Users[email]
+            var res = await _userClient.Users[settings.Email]
                 // only 'Inbox'
                 .MailFolders["Inbox"]
                 .Messages
@@ -69,7 +69,7 @@ namespace GraphApiEmailDownloader
                     // request specific properties
                     config.QueryParameters.Select = new[] { "from", "receivedDateTime", "subject", "body" };
                     // filter by date received
-                    string dateFlt = String.Format( "receivedDateTime ge {0}", startDate );
+                    string dateFlt = String.Format( "receivedDateTime ge {0}", settings.StartDate );
                     Console.WriteLine( "date flt: {0}",dateFlt );
                     config.QueryParameters.Filter = dateFlt;                   
                     // sort by date - from newest
@@ -84,7 +84,7 @@ namespace GraphApiEmailDownloader
                 ( message ) =>
                 {
                     // TODO - proof
-                    return SaveMessage( message );
+                    return SaveMessage( message, settings.DirPath );
                 },
                 // configure subsequent page requests
                 ( req ) =>
@@ -99,20 +99,21 @@ namespace GraphApiEmailDownloader
             return res;
         }
         
-        private static bool SaveMessage( Message message )
+        private static bool SaveMessage( Message message, string dirPath )
         {
             //-------------------------------------------------------------------------------------
             // create target fullpath
             // TODO - load from cfg
-            string tgtDir = "C:\\Users\\root\\Desktop\\test";
+            string tgtDir = @dirPath;
             
             // remove illegal chars
-            string msgDir = string.Join("", message.Subject.Split( Path.GetInvalidFileNameChars() ) );
+            string msgDir = string.Join( "", message.Subject.Split( Path.GetInvalidFileNameChars() ) );
             
             //TODO - empty subject
             // create directory for specific message
             string tgtFullpath = Path.Combine( tgtDir, msgDir );
             Directory.CreateDirectory( tgtFullpath );
+            Console.WriteLine(tgtFullpath);
 
             //-------------------------------------------------------------------------------------
             // write file
