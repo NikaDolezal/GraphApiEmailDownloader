@@ -1,6 +1,7 @@
 ﻿using Azure;
 using Azure.Core;
 using Azure.Identity;
+using log4net;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
 using Microsoft.Kiota.Abstractions;
@@ -24,6 +25,9 @@ namespace GraphApiEmailDownloader
         private static DeviceCodeCredential _deviceCodeCredential;  
         // graph client from user auth
         public static GraphServiceClient _userClient;
+        // logger
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(GraphUtil));
+
 
         public static void InitializeGraphForUserAuth( Settings settings,
             Func<DeviceCodeInfo, CancellationToken, Task> deviceCodePrompt )
@@ -98,22 +102,32 @@ namespace GraphApiEmailDownloader
 
             return res;
         }
-        
-        private static bool SaveMessage( Message message, string dirPath )
+
+        private static bool SaveMessage(Message message, string dirPath)
         {
             //-------------------------------------------------------------------------------------
             // create target fullpath
-            // TODO - load from cfg
             string tgtDir = @dirPath;
-            
-            // remove illegal chars
-            string msgDir = string.Join( "", message.Subject.Split( Path.GetInvalidFileNameChars() ) );
-            
-            //TODO - empty subject
+
+            string msgDir;
+            // check subject
+            if (!String.IsNullOrEmpty(message.Subject))
+            {
+                // remove illegal chars
+                msgDir = string.Join("", message.Subject.Split(Path.GetInvalidFileNameChars()));
+            }
+            else
+            {
+                // arbitrarily name with 'DateTimeReceived' to handle multiple no subject messages in same dir
+                string tmp = String.Format( "no subject {0}", message.ReceivedDateTime );
+                // 'DateTimeReceived' contains illegal chars
+                msgDir = string.Join("", tmp.Split(Path.GetInvalidFileNameChars()));
+            }
+                        
             // create directory for specific message
-            string tgtFullpath = Path.Combine( tgtDir, msgDir );
+            string tgtFullpath = Path.Combine(tgtDir, msgDir);
             Directory.CreateDirectory( tgtFullpath );
-            Console.WriteLine(tgtFullpath);
+            _logger.Debug("target fullpath: " + tgtFullpath);            
 
             //-------------------------------------------------------------------------------------
             // write file
