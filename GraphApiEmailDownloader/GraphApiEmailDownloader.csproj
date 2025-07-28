@@ -226,8 +226,5 @@
   <ItemGroup>
     <PackageReference Include="log4net" Version="*" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="TextFile1.txt" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

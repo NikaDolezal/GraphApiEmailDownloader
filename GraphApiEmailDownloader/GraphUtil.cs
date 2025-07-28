@@ -1,19 +1,11 @@
-﻿using Azure;
-using Azure.Core;
-using Azure.Identity;
+﻿using Azure.Identity;
 using log4net;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
-using Microsoft.Kiota.Abstractions;
 using System;
-using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using static System.Windows.Forms.LinkLabel;
 
 namespace GraphApiEmailDownloader
 {
@@ -45,6 +37,7 @@ namespace GraphApiEmailDownloader
             _deviceCodeCredential = new DeviceCodeCredential( options );
 
             _userClient = new GraphServiceClient( _deviceCodeCredential, settings.GraphUserScopes );
+            
         }
         
         public static async Task<MessageCollectionResponse> ProcessInboxAsync( Settings settings )                  
@@ -52,8 +45,7 @@ namespace GraphApiEmailDownloader
             // make sure client isn't null
             if (_userClient == null)
             {
-                //Console.WriteLine( "Graph not initialized" );
-                //return null;
+                //to deal with one layer up
                 throw new System.NullReferenceException( "Graph not initialized" );
             }
 
@@ -71,10 +63,10 @@ namespace GraphApiEmailDownloader
                     // testing PageIterator
                     config.QueryParameters.Top = 3;
                     // request specific properties
-                    config.QueryParameters.Select = new[] { "from", "receivedDateTime", "subject", "body" };
+                    config.QueryParameters.Select = new[] { "receivedDateTime", "subject", "body" };
                     // filter by date received
                     string dateFlt = String.Format( "receivedDateTime ge {0}", settings.StartDate );
-                    Console.WriteLine( "date flt: {0}",dateFlt );
+                    _logger.Debug( "receivedDateTime flt: " + dateFlt );
                     config.QueryParameters.Filter = dateFlt;                   
                     // sort by date - from newest
                     config.QueryParameters.Orderby = new[] { "receivedDateTime DESC" };                    
@@ -127,17 +119,23 @@ namespace GraphApiEmailDownloader
             // create directory for specific message
             string tgtFullpath = Path.Combine(tgtDir, msgDir);
             Directory.CreateDirectory( tgtFullpath );
-            _logger.Debug("target fullpath: " + tgtFullpath);            
+            _logger.Debug("target fullpath: " + tgtFullpath);
 
             //-------------------------------------------------------------------------------------
             // write file
             // 'using' - for cleanup
-            using ( StreamWriter outputFile = new StreamWriter( Path.Combine( tgtFullpath, "message.txt" ) ) )
+            try
             {
-                outputFile.WriteLine( message.Body.Content );
+                using (StreamWriter outputFile = new StreamWriter(Path.Combine(tgtFullpath, "message.txt")))
+                {
+                    outputFile.WriteLine(message.Body.Content);
+                }
+            }
+            catch (IOException e)
+            {
+                _logger.Error( String.Format( "Problem writing message to file.\nFullpath: {0}\nError message: {1}", tgtFullpath, e.Message ) );
             }
 
-            // TODO - proof
             return true;
         }
     }
